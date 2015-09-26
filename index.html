@@ -4,6 +4,16 @@
 	<title>Shepard Tone</title>
 </head>
 <body>
+	<!-- Load c3.css -->
+	<link href="node_modules/c3/c3.min.css" rel="stylesheet" type="text/css">
+
+	<button onclick="togglePlay()">Play/Pause</button>
+	<button onclick="toggleDirection()">Upp/Down</button>
+	<div id="chart"></div>
+
+	<!-- Load d3.js and c3.js -->
+	<script src="node_modules/d3/d3.min.js" charset="utf-8"></script>
+	<script src="node_modules/c3/c3.min.js"></script>
 	<script type="text/javascript" src="shepard.js"></script>
 </body>
 </html>
