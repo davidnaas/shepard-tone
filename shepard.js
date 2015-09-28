@@ -7,10 +7,12 @@
   }
   // TODO understand why these arbitrary values work so well
   const STARTFREQ = 400;
+  const STOPFREQ = 40;
   var mean = STARTFREQ/2;
   var sigma = mean / 10;
 
   var isDescending = true;
+  var plot = false;
 
   // Patching of web audio nodes
   var mainGain = context.createGain();
@@ -40,7 +42,7 @@
     for(var i = 0; i < arr.length; i++) {
       var tmpOsc = context.createOscillator();
       var tmpGain = context.createGain();
-      tmpOsc.frequency.value = (i + 1) * STARTFREQ/arr.length;
+      tmpOsc.frequency.value = (i + 1) * ((STARTFREQ-STOPFREQ)/arr.length);
       tmpOsc.type = "sine";
       tmpOsc.start(1);
       tmpOsc.connect(tmpGain);
@@ -53,24 +55,14 @@
   }
 
   // c3 chart object used to visualize oscs
+  var oscs = [['osc0', 0],['osc1', 0],['osc2', 0],['osc3', 0],['osc4', 0],['osc5', 0],['osc6', 0],['osc7', 0]]
   var chart = c3.generate({
     bindto: '#chart',
     data: {
-      columns: [
-        ['oscs', 0, 0, 0, 0, 0, 0, 0, 0]
-      ],
-      types:{
-        oscs: 'bar'
-      }
-    }
-  });
-
-  chart.axis.range({
-    max: {
-      y: 1
+      columns: oscs
     },
-    min: {
-      y: 0
+    point: {
+      show: false
     }
   });
 
@@ -78,7 +70,7 @@
   function playShepard(){
     oscillators.forEach(function(oscObj, index){
       if(isDescending){
-        if(oscObj.osc.frequency.value > 40){
+        if(oscObj.osc.frequency.value > STOPFREQ){
           oscObj.osc.frequency.value -= 0.03;
         }else{
           oscObj.osc.frequency.value = STARTFREQ;
@@ -87,13 +79,13 @@
         if(oscObj.osc.frequency.value < STARTFREQ){
           oscObj.osc.frequency.value += 0.03;
         }else{
-          oscObj.osc.frequency.value = 40;
+          oscObj.osc.frequency.value = STOPFREQ;
         }
       }
       oscObj.gain.gain.value = freqToVolume(oscObj.osc.frequency.value) * 30;
     });
     // Debounce update rate of c3
-    if(i%10 === 0)
+    if(i%200 === 0)
       updateChart();
     i++;
   }
@@ -104,21 +96,14 @@
   }
 
   function updateChart () {
-    chart.load({
-      columns: [
-        ['oscs',
-          oscillators[0].gain.gain.value,
-          oscillators[1].gain.gain.value,
-          oscillators[2].gain.gain.value,
-          oscillators[3].gain.gain.value,
-          oscillators[4].gain.gain.value,
-          oscillators[5].gain.gain.value,
-          oscillators[6].gain.gain.value,
-          oscillators[7].gain.gain.value
-
-        ]
-      ]
-    });
+    if(plot){
+      oscs.forEach(function (val, i) {
+        val.push(oscillators[i].gain.gain.value)
+      });
+      chart.load({
+        columns: oscs
+      });
+    }
   }
 
   window.togglePlay = function(){
@@ -131,6 +116,10 @@
 
   window.toggleDirection = function(){
     isDescending = !isDescending;
+  }
+
+  window.togglePlot = function() {
+    plot = !plot;
   }
 
 })();
