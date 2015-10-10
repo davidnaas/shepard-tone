@@ -6,10 +6,11 @@
     alert('Web audio does not work with your browser');
   }
   // TODO understand why these arbitrary values work so well
-  const STARTFREQ = 400;
+  const NUMBER_OF_OSCS = 10;
+  const STARTFREQ = 800;
   const STOPFREQ = 40;
-  var mean = STARTFREQ/2;
-  var sigma = mean / 10;
+  var mean = (STARTFREQ - STOPFREQ)/2;
+  var sigma = mean / NUMBER_OF_OSCS;
 
   var isDescending = true;
   var plot = false;
@@ -37,7 +38,7 @@
 
   // Init the oscillator array based on const values
   function populateOscillators() {
-    var arr = new Array(8);
+    var arr = new Array(NUMBER_OF_OSCS);
    
     for(var i = 0; i < arr.length; i++) {
       var tmpOsc = context.createOscillator();
@@ -55,7 +56,15 @@
   }
 
   // c3 chart object used to visualize oscs
-  var oscs = [['osc0', 0],['osc1', 0],['osc2', 0],['osc3', 0],['osc4', 0],['osc5', 0],['osc6', 0],['osc7', 0]]
+  var oscs = [['osc0', freqToVolume(oscillators[0]['osc'].frequency.value)],
+              ['osc1', freqToVolume(oscillators[1]['osc'].frequency.value)],
+              ['osc2', freqToVolume(oscillators[2]['osc'].frequency.value)],
+              ['osc3', freqToVolume(oscillators[3]['osc'].frequency.value)],
+              ['osc4', freqToVolume(oscillators[4]['osc'].frequency.value)],
+              ['osc5', freqToVolume(oscillators[5]['osc'].frequency.value)],
+              ['osc6', freqToVolume(oscillators[6]['osc'].frequency.value)],
+              ['osc7', freqToVolume(oscillators[7]['osc'].frequency.value)]
+            ]
   var chart = c3.generate({
     bindto: '#chart',
     data: {
@@ -71,22 +80,22 @@
     oscillators.forEach(function(oscObj, index){
       if(isDescending){
         if(oscObj.osc.frequency.value > STOPFREQ){
-          oscObj.osc.frequency.value -= 0.03;
+          oscObj.osc.frequency.value -= 0.04;
         }else{
           oscObj.osc.frequency.value = STARTFREQ;
         }
       }else{
         if(oscObj.osc.frequency.value < STARTFREQ){
-          oscObj.osc.frequency.value += 0.03;
+          oscObj.osc.frequency.value += 0.04;
         }else{
           oscObj.osc.frequency.value = STOPFREQ;
         }
       }
-      oscObj.gain.gain.value = freqToVolume(oscObj.osc.frequency.value) * 30;
+      oscObj.gain.gain.value = freqToVolume(oscObj.osc.frequency.value) * 50;
     });
     // Debounce update rate of c3
-    if(i%200 === 0)
-      updateChart();
+    if(i%100 === 0)
+      window.requestAnimationFrame(updateChart);
     i++;
   }
 
@@ -96,6 +105,7 @@
   }
 
   function updateChart () {
+    console.log('update chart')
     if(plot){
       oscs.forEach(function (val, i) {
         val.push(oscillators[i].gain.gain.value)
