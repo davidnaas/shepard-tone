@@ -1,0 +1,24 @@
+{
+  "name": "shepard",
+  "version": "1.0.0",
+  "description": "A auditory illusion generator and visualizer",
+  "main": "shepard.js",
+  "dependencies": {
+    "c3": "^0.4.18",
+    "d3": "^3.5.17"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidnaas/shepard-tone.git"
+  },
+  "author": "David Nääs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davidnaas/shepard-tone/issues"
+  },
+  "homepage": "https://github.com/davidnaas/shepard-tone#readme"
+}
