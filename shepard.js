@@ -17,24 +17,10 @@
 
   // Patching of web audio nodes
   var mainGain = context.createGain();
+  mainGain.connect(context.destination)
   mainGain.gain.value = 0;
   oscillators = populateOscillators();
   window.setInterval(playShepard, 2);
-
-  // Load and connect convolution reverb
-  var convolver = context.createConvolver();
-  mainGain.connect(convolver);
-  convolver.connect(context.destination);
-  var request = new XMLHttpRequest();
-  request.open("GET", "IR.wav", true);
-  request.responseType = "arraybuffer";
-
-  request.onload = function () {
-    context.decodeAudioData(request.response, function(buffer) {
-        convolver.buffer = buffer;
-     });
-  }
-  request.send();
 
   // Init the oscillator array based on const values
   function populateOscillators() {
@@ -64,7 +50,8 @@
               ['osc5', freqToVolume(oscillators[5]['osc'].frequency.value)],
               ['osc6', freqToVolume(oscillators[6]['osc'].frequency.value)],
               ['osc7', freqToVolume(oscillators[7]['osc'].frequency.value)]
-            ]
+            ];
+
   var chart = c3.generate({
     bindto: '#chart',
     data: {
@@ -74,6 +61,22 @@
       show: false
     }
   });
+
+  // Gaussian bell curve
+  function freqToVolume(freq) {
+    return (1/(sigma * Math.sqrt(2 * Math.PI))) * Math.pow(Math.E, -(Math.pow(freq - mean, 2)/(2*Math.pow(sigma, 2))));
+  }
+
+  function updateChart () {
+    if(plot){
+      oscs.forEach(function (val, i) {
+        val.push(oscillators[i].gain.gain.value)
+      });
+      chart.load({
+        columns: oscs
+      });
+    }
+  }
 
   var i = 0;
   function playShepard(){
@@ -97,23 +100,6 @@
     if(i%100 === 0)
       window.requestAnimationFrame(updateChart);
     i++;
-  }
-
-  // Gaussian bell curve
-  function freqToVolume(freq) {
-    return (1/(sigma * Math.sqrt(2 * Math.PI))) * Math.pow(Math.E, -(Math.pow(freq - mean, 2)/(2*Math.pow(sigma, 2))));
-  }
-
-  function updateChart () {
-    console.log('update chart')
-    if(plot){
-      oscs.forEach(function (val, i) {
-        val.push(oscillators[i].gain.gain.value)
-      });
-      chart.load({
-        columns: oscs
-      });
-    }
   }
 
   window.togglePlay = function(){
